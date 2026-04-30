@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login | DOX Logistics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+/* ===== Animated Background ===== */
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at 20% 30%, #0d2b45, transparent 40%),
+                radial-gradient(circle at 80% 70%, #132f4c, transparent 40%),
+                #0b1c2d;
+    overflow: hidden;
+}
+
+/* Soft floating glow effect */
+body::before {
+    content: "";
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: rgba(13,110,253,0.15);
+    border-radius: 50%;
+    filter: blur(120px);
+    animation: moveGlow 8s infinite alternate ease-in-out;
+}
+
+@keyframes moveGlow {
+    from { transform: translate(-100px, -50px); }
+    to { transform: translate(100px, 50px); }
+}
+
+/* ===== Glass Card ===== */
+.login-box {
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+    padding: 45px;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    color: #fff;
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Accent top line */
+.login-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 5px;
+    width: 100%;
+    background: linear-gradient(90deg, #0d6efd, #00c6ff);
+    border-radius: 20px 20px 0 0;
+}
+
+/* Icon */
+.secure-icon {
+    font-size: 38px;
+    margin-bottom: 15px;
+    color: #0d6efd;
+}
+
+/* Inputs */
+.form-control {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 15px;
+    color: #fff;
+    transition: 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: rgba(255,255,255,0.6);
+}
+
+.form-control:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 0 3px rgba(13,110,253,0.4);
+    color: #fff;
+}
+
+/* Password wrapper */
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+}
+
+/* Button */
+.btn-login {
+    background: linear-gradient(90deg, #0d6efd, #00c6ff);
+    border: none;
+    border-radius: 30px;
+    padding: 10px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-login:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,198,255,0.4);
+}
+
+/* Error */
+#error {
+    font-size: 14px;
+}
+
+/* Mobile spacing */
+@media (max-width: 576px) {
+    .login-box {
+        padding: 30px;
+        margin: 20px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login-box text-center">
+
+    <div class="secure-icon">
+        <i class="fas fa-shield-halved"></i>
+    </div>
+
+    <h4 class="mb-4 fw-bold">DOX Secure Admin Access</h4>
+
+    <form id="loginForm">
+
+        <div class="mb-3">
+            <input type="email" id="email" class="form-control" placeholder="Admin Email" required>
+        </div>
+
+        <div class="mb-3 password-wrapper">
+            <input type="password" id="password" class="form-control" placeholder="Password" required>
+            <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+        </div>
+
+        <button class="btn btn-login w-100">Login Securely</button>
+
+        <p id="error" class="text-danger mt-3"></p>
+    </form>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB-AruNpj2u6Vxzc4CZm-6gpQ_lR9v9twM",
+  authDomain: "dox-request-quote.firebaseapp.com",
+  databaseURL: "https://dox-request-quote-default-rtdb.firebaseio.com",
+  projectId: "dox-request-quote",
+  storageBucket: "dox-request-quote.firebasestorage.app",
+  messagingSenderId: "252175468809",
+  appId: "1:252175468809:web:182293f4f296c26467ebd8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginForm").addEventListener("submit", e => {
+    e.preventDefault();
+
+    signInWithEmailAndPassword(auth, email.value, password.value)
+    .then(() => {
+        window.location.href = "admin.html";
+    })
+    .catch(() => {
+        document.getElementById("error").textContent = "Invalid login credentials.";
+    });
+});
+
+/* Toggle Password Visibility */
+const togglePassword = document.getElementById("togglePassword");
+const password = document.getElementById("password");
+
+togglePassword.addEventListener("click", () => {
+    const type = password.getAttribute("type") === "password" ? "text" : "password";
+    password.setAttribute("type", type);
+
+    togglePassword.classList.toggle("fa-eye");
+    togglePassword.classList.toggle("fa-eye-slash");
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard | DOX Logistics</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+/* ===== Background ===== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6f9;
+    color: #1f2d3d;
+}
+
+
+/* Fade in */
+#adminContent {
+    display: none;
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Navbar ===== */
+.navbar {
+    background: rgba(255,255,255,0.05) !important;
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* ===== Glass Section Box ===== */
+.section-box {
+    background: rgba(255,255,255,0.07);
+    padding: 25px;
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    margin-bottom: 40px;
+}
+
+/* ===== Dashboard Cards ===== */
+.dashboard-card {
+    background: rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    transition: 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-count {
+    font-size: 32px;
+    font-weight: bold;
+    background: linear-gradient(90deg, #0d6efd, #00c6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===== Tables ===== */
+/* Table text color for better visibility */
+.table tbody, 
+.table tbody td {
+    color: #0d6efd; /* DOX brand blue */
+}
+
+.table thead th {
+    color: black; /* Keep header white for contrast */
+}
+
+.table {
+    color: #fff;
+}
+
+.table thead {
+    background: rgba(255,255,255,0.1);
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.table td, .table th {
+    vertical-align: middle;
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* Badge */
+.badge-done {
+    background: linear-gradient(90deg, #198754, #20c997);
+    padding: 6px 10px;
+    border-radius: 20px;
+}
+
+/* Buttons */
+.btn-success {
+    background: linear-gradient(90deg, #198754, #20c997);
+    border: none;
+}
+
+.btn-success:hover {
+    opacity: 0.9;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #dc3545, #ff6b6b);
+    border: none;
+}
+
+/* Scrollbar (nice look) */
+::-webkit-scrollbar {
+    height: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 10px;
+}
+
+/* Mobile spacing */
+@media(max-width:768px){
+    .dashboard-card {
+        margin-bottom: 20px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="adminContent">
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-light bg-white px-4 py-3 shadow-sm">
+    <span class="navbar-brand text-primary fw-bold">
+        <i class="fas fa-shield-halved me-2"></i>
+        DOX Admin Dashboard
+    </span>
+
+    <div class="d-flex gap-2">
+        <a href="post-jobs.html" class="btn btn-outline-primary btn-sm">
+            Post Jobs
+        </a>
+        <button id="logout" class="btn btn-danger btn-sm">
+            Logout
+        </button>
+    </div>
+</nav>
+
+
+<div class="container my-4">
+
+    <!-- DASHBOARD CARDS -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div>Total Quote Requests</div>
+                <div class="card-count" id="quoteCount">0</div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="dashboard-card">
+                <div>Total Contact Messages</div>
+                <div class="card-count" id="contactCount">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUOTES -->
+    <div class="section-box">
+        <h4 class="mb-3">Fuel Truck Quote Requests</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Product</th>
+                        <th>Truck</th>
+                        <th>Capacity</th>
+                        <th>Qty</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="quotes"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="section-box">
+        <h4 class="mb-3">Contact Messages</h4>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="contacts"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+<!-- FIREBASE SCRIPT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+/* Firebase Config */
+const firebaseConfig = {
+  apiKey: "AIzaSyB-AruNpj2u6Vxzc4CZm-6gpQ_lR9v9twM",
+  authDomain: "dox-request-quote.firebaseapp.com",
+  databaseURL: "https://dox-request-quote-default-rtdb.firebaseio.com",
+  projectId: "dox-request-quote",
+  storageBucket: "dox-request-quote.firebasestorage.app",
+  messagingSenderId: "252175468809",
+  appId: "1:252175468809:web:182293f4f296c26467ebd8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+/* 🔐 Protect Page */
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.replace("admin-login.html");
+        return;
+    }
+
+    document.getElementById("adminContent").style.display = "block";
+    loadQuotes();
+    loadContacts();
+});
+
+/* Load Quotes */
+function loadQuotes() {
+    const quotesRef = ref(db, "quotes");
+
+    onValue(quotesRef, (snapshot) => {
+        const tbody = document.getElementById("quotes");
+        tbody.innerHTML = "";
+        let count = 0;
+
+        snapshot.forEach((child) => {
+            const q = child.val();
+            const date = q.timestamp ? new Date(q.timestamp).toLocaleString() : "-";
+            count++;
+
+            tbody.innerHTML += `
+            <tr>
+                <td>${date}</td>
+                <td>${q.name || "-"}</td>
+                <td>${q.email || "-"}</td>
+                <td>${q.phone || "-"}</td>
+                <td>${q.productType || "-"}</td>
+                <td>${q.truckBrand || "-"}</td>
+                <td>${q.tankCapacity || "-"}</td>
+                <td>${q.quantity || "-"}</td>
+                <td>${q.message || "-"}</td>
+                <td>
+                    ${q.attended
+                        ? '<span class="badge badge-done text-white">✔ Done</span>'
+                        : `<button class="btn btn-success btn-sm" onclick="markQuoteDone('${child.key}')">Mark Done</button>`
+                    }
+                </td>
+            </tr>`;
+        });
+
+        document.getElementById("quoteCount").textContent = count;
+    });
+}
+
+/* Load Contacts */
+function loadContacts() {
+    const contactsRef = ref(db, "contactMessages");
+
+    onValue(contactsRef, (snapshot) => {
+        const tbody = document.getElementById("contacts");
+        tbody.innerHTML = "";
+        let count = 0;
+
+        snapshot.forEach((child) => {
+            const c = child.val();
+            const date = c.timestamp ? new Date(c.timestamp).toLocaleString() : "-";
+            count++;
+
+            tbody.innerHTML += `
+            <tr>
+                <td>${date}</td>
+                <td>${c.name || "-"}</td>
+                <td>${c.email || "-"}</td>
+                <td>${c.subject || "-"}</td>
+                <td>${c.message || "-"}</td>
+                <td>
+                    ${c.attended
+                        ? '<span class="badge badge-done text-white">✔ Done</span>'
+                        : `<button class="btn btn-success btn-sm" onclick="markContactDone('${child.key}')">Mark Done</button>`
+                    }
+                </td>
+            </tr>`;
+        });
+
+        document.getElementById("contactCount").textContent = count;
+    });
+}
+
+/* Mark Quote Done */
+window.markQuoteDone = (id) => {
+    update(ref(db, "quotes/" + id), { attended: true });
+};
+
+/* Mark Contact Done */
+window.markContactDone = (id) => {
+    update(ref(db, "contactMessages/" + id), { attended: true });
+};
+
+/* Logout */
+document.getElementById("logout").addEventListener("click", () => {
+    signOut(auth).then(() => {
+        window.location.replace("admin-login.html");
+    });
+});
+</script>
+
+</body>
+</html>

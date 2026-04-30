@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post Jobs | DOX Logistics Admin</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; }
+.container { max-width: 700px; margin-top: 120px; }
+h2 { text-align: center; margin-bottom: 30px; font-weight: 700; }
+#jobListAdmin .job-item { 
+    background: #fff; 
+    padding: 15px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Admin: Post & Manage Jobs</h2>
+
+    <!-- Login Form -->
+    <div id="loginDiv">
+        <form id="adminLoginForm">
+            <div class="mb-3">
+                <input type="email" class="form-control" id="adminEmail" placeholder="Admin Email" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="form-control" id="adminPassword" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-dark w-100">Login</button>
+        </form>
+    </div>
+
+    <!-- Job Posting Form -->
+    <div id="jobFormDiv" style="display:none;">
+        <form id="jobForm" class="mb-4">
+            <div class="mb-3">
+                <input type="text" id="jobTitle" class="form-control" placeholder="Job Title" required>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="jobLocation" class="form-control" placeholder="Location" required>
+            </div>
+            <div class="mb-3">
+                <select id="jobType" class="form-select" required>
+                    <option value="">Select Job Type</option>
+                    <option value="Full-Time">Full-Time</option>
+                    <option value="Part-Time">Part-Time</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <input type="text" id="jobDepartment" class="form-control" placeholder="Department" required>
+            </div>
+            <div class="mb-3">
+                <textarea id="jobDescription" class="form-control" placeholder="Job Description" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-2">Post Job</button>
+            <button id="logoutBtn" type="button" class="btn btn-danger w-100">Logout</button>
+        </form>
+
+        <!-- Job List -->
+        <h4 class="mb-3">Current Jobs</h4>
+        <div id="jobListAdmin">
+            <!-- Jobs will be dynamically inserted here -->
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+
+/* Firebase Config */
+const firebaseConfig = {
+  apiKey: "AIzaSyB-AruNpj2u6Vxzc4CZm-6gpQ_lR9v9twM",
+  authDomain: "dox-request-quote.firebaseapp.com",
+  databaseURL: "https://dox-request-quote-default-rtdb.firebaseio.com",
+  projectId: "dox-request-quote",
+  storageBucket: "dox-request-quote.firebasestorage.app",
+  messagingSenderId: "252175468809",
+  appId: "1:252175468809:web:182293f4f296c26467ebd8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+/* Elements */
+const loginDiv = document.getElementById("loginDiv");
+const jobFormDiv = document.getElementById("jobFormDiv");
+const jobListAdmin = document.getElementById("jobListAdmin");
+
+/* Check login state */
+onAuthStateChanged(auth, user => {
+    if(user && user.email === "logistics.dox@gmail.com"){
+        loginDiv.style.display = "none";
+        jobFormDiv.style.display = "block";
+        loadJobs();
+    } else {
+        loginDiv.style.display = "block";
+        jobFormDiv.style.display = "none";
+    }
+});
+
+/* Admin Login */
+document.getElementById("adminLoginForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    const email = document.getElementById("adminEmail").value;
+    const password = document.getElementById("adminPassword").value;
+    if(email !== "logistics.dox@gmail.com"){
+        alert("Only logistics.dox@gmail.com can login");
+        return;
+    }
+    signInWithEmailAndPassword(auth, email, password)
+        .then(()=> alert("Logged in successfully!"))
+        .catch(err=> alert("Login error: "+err.message));
+});
+
+/* Logout */
+document.getElementById("logoutBtn").addEventListener("click", ()=>{
+    signOut(auth);
+});
+
+/* Post Job */
+document.getElementById("jobForm").addEventListener("submit", e=>{
+    e.preventDefault();
+    const jobData = {
+        title: document.getElementById("jobTitle").value,
+        location: document.getElementById("jobLocation").value,
+        type: document.getElementById("jobType").value,
+        department: document.getElementById("jobDepartment").value,
+        description: document.getElementById("jobDescription").value
+    };
+    push(ref(db, "jobs"), jobData)
+        .then(()=>{
+            alert("Job posted successfully!");
+            document.getElementById("jobForm").reset();
+        });
+});
+
+/* Load Jobs & Display with Delete */
+function loadJobs(){
+    const jobsRef = ref(db, "jobs");
+    onValue(jobsRef, snapshot=>{
+        jobListAdmin.innerHTML = "";
+        snapshot.forEach(child=>{
+            const job = child.val();
+            const key = child.key;
+            jobListAdmin.innerHTML += `
+                <div class="job-item">
+                    <div>
+                        <strong>${job.title}</strong> - ${job.type} | ${job.department} | ${job.location}
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteJob('${key}')">
+                        <i class="fa fa-trash"></i> Delete
+                    </button>
+                </div>
+            `;
+        });
+    });
+}
+
+/* Delete Job */
+window.deleteJob = function(key){
+    if(confirm("Are you sure you want to delete this job?")){
+        remove(ref(db, "jobs/" + key))
+            .then(()=> alert("Job deleted successfully!"))
+            .catch(err=> alert("Error deleting job: "+err.message));
+    }
+}
+</script>
+
+</body>
+</html>
